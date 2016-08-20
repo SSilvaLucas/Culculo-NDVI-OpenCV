@@ -7,11 +7,6 @@
 
 using namespace cv;
 
-float calculo_NDVI(float nir, float red) {
-	float ndvi = ((nir - red) / (nir + red));
-	return ndvi;
-}
-
 int main(int argc, char** argv) {
 
 	Mat imagem_BGR, imagem_HSV, imagem_ColorMap;
@@ -64,6 +59,7 @@ int main(int argc, char** argv) {
 	namedWindow("Add NIR, RED", WINDOW_NORMAL);
 	imshow("Add NIR, RED", denominador);
 	*/
+
 	namedWindow("Imagem NDVI", WINDOW_NORMAL);
 	imshow("Imagem NDVI", imagem_NDVI);
 
