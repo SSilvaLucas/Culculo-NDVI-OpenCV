@@ -5,85 +5,68 @@
 #include <cv.h>
 #include <highgui.h>
 
-
 using namespace cv;
 
-float ndvi_calculo(float nir, float vermelho){
-	float ndvi = ((nir - vermelho) / (nir + vermelho));
-	return floor((ndvi + 1) * 127.999);
+float calculo_NDVI(float nir, float red) {
+	float ndvi = ((nir - red) / (nir + red));
+	return ndvi;
 }
-
 
 int main(int argc, char** argv) {
 
-	Mat	imagem, imagem_hsv;
+	Mat imagem_BGR, imagem_HSV, imagem_ColorMap;
 
-	imagem = imread(argv[1]);
-	if(!imagem.data){
+	imagem_BGR = imread(argv[1]);
+	if (!imagem_BGR.data) {
 		std::cout << "Erro ao carregar a Imagem!\n";
-		return(-1);
+		return (-1);
 	}
 
-	Mat imagem_rgb_ndvi = imagem.clone();
+	namedWindow("Imagem Original", WINDOW_NORMAL);
+	imshow("Imagem Original", imagem_BGR);
 
-	namedWindow("imagem", CV_WINDOW_AUTOSIZE);
-	imshow("imagem", imagem);
+	cvtColor(imagem_BGR, imagem_HSV, COLOR_BGR2HSV);
 
-	//imagem.convertTo(imagem_float, CV_32FC3);
-	int width = imagem.size().width;
-	int height = imagem.size().height;
+	namedWindow("Imagem HSV", WINDOW_NORMAL);
+	imshow("Imagem HSV", imagem_HSV);
 
-	for(int x=0; x < width; x++){
-		for(int y=0; y < height; y++){
-			Vec3f c1 = imagem.at<Vec3f>(x, y);
-			float b = c1.val[0];
-			float r = c1.val[2];
-			float ndvi = ndvi_calculo(b,r);
-			//std::cout << ndvi << " ";
-			//imagem_rgb_ndvi.at<uchar>(x, y)[0] = ndvi;
-			//c1.val[0] = ndvi;
-			//imagem_rgb.at<Vec3f>(x, y) = c1;
-		}
-	}
+	Mat numerador = Mat::ones(imagem_BGR.rows, imagem_BGR.cols, CV_32FC1);
+	Mat denominador = Mat::ones(imagem_BGR.rows, imagem_BGR.cols, CV_32FC1);
+	Mat imagem_NDVI = Mat::ones(imagem_BGR.rows, imagem_BGR.cols, CV_32FC1);
+	Mat imagem_MAPHSV = Mat::ones(imagem_BGR.rows, imagem_BGR.cols, CV_8UC1);
+	std::vector<Mat> channels;
 
-	imwrite("teste.tiff", imagem_rgb_ndvi);
+	split(imagem_BGR, channels);
 
-	//namedWindow("imagem rgb + ndvi", CV_WINDOW_AUTOSIZE);
-	//imshow("Imagem rgb + ndvi", imagem);
+	subtract(channels[0], channels[2], numerador);
+	add(channels[0], channels[2], denominador);
+	divide(denominador, numerador, imagem_NDVI);
 
-	//cvtColor(imagem_rgb, imagem_hsv, CV_BGR2HSV);
+	normalize(imagem_NDVI, imagem_NDVI, 0, 180, NORM_MINMAX, CV_8UC1);
 
-	//namedWindow("imagem HSV", CV_WINDOW_AUTOSIZE);
-	//imshow("imagem HSV", imagem_hsv);
+	std::vector<Mat> channel;
 
-	/*int width = imagem.size().width;
-	int height = imagem.size().height;
+	split(imagem_HSV, channel);
 
-	for(int x=0; x < width; x++){
-		for(int y=0; y < height; y++){
-			//imagem_hsv_ndvi.at<Vec3b>(x, y) = imagem_hsv.at<Vec3b>(x, y);
-			//float nir  = imagem_hsv.at<Vec3b>(x,y)[0];
-			//float vermelho = imagem_hsv.at<Vec3b>(x,y)[2];
-			//imagem_hsv_ndvi.at<Vec3b>(x, y)[2] = 0;
-			//imagem_hsv_ndvi.at<Vec3b>(x, y)[0] = ndvi2hsv(nir, vermelho);
-			Vec3f c1 = imagem.at<cv::Vec3f>(x, y);
-			float r = c1.val[0];
-			float g = c1.val[1];
-			float b = c1.val[2];
-			float ndvi = ndvi2hsv(b,r);
+	std::vector<Mat> newChannels;
+	newChannels.push_back(imagem_NDVI);
+	newChannels.push_back(channel[1]);
+	newChannels.push_back(channel[2]);
+	merge(newChannels, imagem_MAPHSV);
 
-			std::cout << ndvi << " ";
-			//std::cout << v << " ";
-		}
-	}*/
+	namedWindow("Mapa de cores HSV", WINDOW_NORMAL);
+	imshow("Mapa de cores HSV", imagem_MAPHSV);
 
-	//namedWindow("imagem HSV + NDVI", CV_WINDOW_AUTOSIZE);
-	//imshow("imagem HSV + NDVI", imagem_hsv_ndvi);
+	/*
+	namedWindow("Subtract NIR, RED", WINDOW_NORMAL);
+	imshow("Subtract NIR, RED", numerador);
 
-	waitKey();
-	//destroyWindow("imagem");
-	//destroyWindow("imagem HSV");
-	//destroyWindow("imagem HSV + NDVI");
+	namedWindow("Add NIR, RED", WINDOW_NORMAL);
+	imshow("Add NIR, RED", denominador);
+	*/
+	namedWindow("Imagem NDVI", WINDOW_NORMAL);
+	imshow("Imagem NDVI", imagem_NDVI);
+
+	waitKey(0);
 	return 0;
 }
-//cvtColor(imagem, gray_ndvi, CV_BGR2GRAY);
