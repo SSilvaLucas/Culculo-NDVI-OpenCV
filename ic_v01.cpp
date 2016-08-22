@@ -33,8 +33,8 @@ int main(int argc, char** argv) {
 
 	split(imagem_BGR, channels);
 
-	subtract(channels[0], channels[2], numerador);
-	add(channels[0], channels[2], denominador);
+	subtract(channels[2], channels[1], numerador);
+	add(channels[2], channels[1], denominador);
 	divide(denominador, numerador, imagem_NDVI);
 
 	normalize(imagem_NDVI, imagem_NDVI, 0, 180, NORM_MINMAX, CV_8UC1);
@@ -49,19 +49,11 @@ int main(int argc, char** argv) {
 	newChannels.push_back(channel[2]);
 	merge(newChannels, imagem_MAPHSV);
 
-	namedWindow("Mapa de cores HSV", WINDOW_NORMAL);
-	imshow("Mapa de cores HSV", imagem_MAPHSV);
-
-	/*
-	namedWindow("Subtract NIR, RED", WINDOW_NORMAL);
-	imshow("Subtract NIR, RED", numerador);
-
-	namedWindow("Add NIR, RED", WINDOW_NORMAL);
-	imshow("Add NIR, RED", denominador);
-	*/
-
 	namedWindow("Imagem NDVI", WINDOW_NORMAL);
 	imshow("Imagem NDVI", imagem_NDVI);
+
+	namedWindow("Mapa de cores HSV", WINDOW_NORMAL);
+	imshow("Mapa de cores HSV", imagem_MAPHSV);
 
 	waitKey(0);
 	return 0;
