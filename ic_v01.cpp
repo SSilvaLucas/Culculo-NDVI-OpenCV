@@ -35,9 +35,7 @@ int main(int argc, char** argv) {
 
 	subtract(channels[2], channels[1], numerador);
 	add(channels[2], channels[1], denominador);
-	divide(denominador, numerador, imagem_NDVI);
-
-	normalize(imagem_NDVI, imagem_NDVI, 0, 180, NORM_MINMAX, CV_8UC1);
+	divide(numerador, denominador, imagem_NDVI);
 
 	std::vector<Mat> channel;
 
@@ -47,10 +45,8 @@ int main(int argc, char** argv) {
 	newChannels.push_back(imagem_NDVI);
 	newChannels.push_back(channel[1]);
 	newChannels.push_back(channel[2]);
-	merge(newChannels, imagem_MAPHSV);
 
-	namedWindow("Imagem NDVI", WINDOW_NORMAL);
-	imshow("Imagem NDVI", imagem_NDVI);
+	merge(newChannels, imagem_MAPHSV);
 
 	namedWindow("Mapa de cores HSV", WINDOW_NORMAL);
 	imshow("Mapa de cores HSV", imagem_MAPHSV);
